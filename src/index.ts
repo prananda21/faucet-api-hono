@@ -5,9 +5,11 @@ import { resolver } from 'hono-openapi/zod';
 import { transactionResponseSchema } from './utils/validation/schema';
 import { swaggerUI } from '@hono/swagger-ui';
 import { TransactionRepository } from './database/repository/implementation';
-import { isHttpError } from './utils/function';
+import { formatWaitTime, isHttpError } from './utils/function';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
 import { BadRequestException } from './utils/error/custom';
+import { addJobs, queueEvent, worker } from './provider/queue';
+import { IDripResponse } from './utils/interface';
 
 const app = new Hono();
 const transactionRepo = new TransactionRepository();
@@ -64,17 +66,34 @@ app.post(
     /**
      * Check database first
      */
+    console.log('👨‍💻 Checking on database...');
     const alreadyTransaction = await transactionRepo.hasWalletDripToday(
       walletAddress,
     );
-    if (alreadyTransaction) {
+    if (alreadyTransaction.canDrip === false) {
+      console.error('⛔️ Limitation Error due another transaction in one day.');
+      const waitTimeFormat = formatWaitTime(alreadyTransaction.waitTimeSeconds);
       throw new BadRequestException(
         'Limitation Error',
-        'Only one transaction for one wallet per day, try in 24 hours',
+        `Only one transaction for one wallet per day, try in ${waitTimeFormat}`,
       );
     }
+    console.log('✅ Database checking success, continue to next flow.');
 
-    return c.json({ message: 'hello' });
+    /**
+     * Add Queue
+     */
+    console.log('🚶 Entering queue...');
+    const job = await addJobs(walletAddress, { walletAddress });
+    const result = await job.waitUntilFinished(queueEvent);
+    const data: IDripResponse = {
+      walletAddress: result.to,
+      transactionHash: result.hash,
+      tokenValue: Bun.env.TOKEN_VALUE as string,
+      onchainUrl: `${Bun.env.ONCHAIN_URL}/${result.hash}`,
+    };
+
+    return c.json({ data, message: 'Transaction success.' });
   },
 );
 
