@@ -1,6 +1,8 @@
 import { TransactionStatus } from './enum';
 import { TransactionStatusType } from './type';
 
+type DEFAULT_EVM_ADDRESS = `0x${string}`;
+
 export interface TransactionRequest {
   wallet_address: string;
 }
@@ -26,8 +28,12 @@ export interface CustomResponse {
 }
 
 export interface IDripResponse {
-  wallet_address: `0x${string}`;
-  transaction_hash: `0x${string}`;
-  token_value: string;
-  onchain_url: string;
+  walletAddress: DEFAULT_EVM_ADDRESS;
+  transactionHash: DEFAULT_EVM_ADDRESS;
+  tokenValue: string;
+  onchainUrl: string;
+}
+
+export interface JobDataType {
+  walletAddress: DEFAULT_EVM_ADDRESS;
 }
