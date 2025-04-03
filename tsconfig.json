@@ -3,6 +3,11 @@
     "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "sourceMap": true
+    "sourceMap": true,
+    "types": [
+      // Remove or fix these entries if they are not correct or necessary.
+      "json-schema",
+      "k6"
+    ]
   }
 }
