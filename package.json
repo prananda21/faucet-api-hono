@@ -8,6 +8,7 @@
     "@hono/zod-validator": "^0.4.3",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.41.0",
+    "ethers": "5.7",
     "hono": "^4.7.5",
     "hono-openapi": "^0.4.6",
     "zod": "^3.24.2",
