@@ -1,0 +1,20 @@
+export enum HttpStatusCode {
+  OK = 200,
+  ACCEPTED = 202,
+  BAD_REQUEST = 400,
+  NOT_FOUND = 404,
+  INTERNAL_SERVER = 500,
+  CREATED = 201,
+  UNAUTHORIZATION = 401,
+  CONFLICT = 409,
+  FORBIDDEN = 403,
+  REDIRECT = 302,
+  TO_MANY_REQUEST = 429,
+  SERVICE_UNAVAILABLE = 503,
+}
+
+export enum TransactionStatus {
+  PENDING = 'PENDING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+}
