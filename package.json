@@ -4,11 +4,14 @@
     "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.5.1",
     "@hono/zod-validator": "^0.4.3",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.41.0",
     "hono": "^4.7.5",
-    "zod": "^3.24.2"
+    "hono-openapi": "^0.4.6",
+    "zod": "^3.24.2",
+    "zod-openapi": "^4.2.4"
   },
   "devDependencies": {
     "@types/bun": "^1.2.8",
