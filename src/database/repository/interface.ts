@@ -2,7 +2,9 @@ import { TransactionValue } from '../../utils/interface';
 
 export interface ITransactionRepo {
   create(wallet_address: string): Promise<TransactionValue>;
-  hasWalletDripToday(wallet_address: string): Promise<boolean>;
+  hasWalletDripToday(
+    wallet_address: string,
+  ): Promise<{ canDrip: boolean; waitTimeMs: number }>;
   updateSuccess(
     wallet_address: string,
     tx_hash: string,
