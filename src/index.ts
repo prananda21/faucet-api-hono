@@ -10,9 +10,35 @@ import { ContentfulStatusCode } from 'hono/utils/http-status';
 import { BadRequestException } from './utils/error/custom';
 import { addJobs, queueEvent, worker } from './provider/queue';
 import { IDripResponse } from './utils/interface';
+import { cors } from 'hono/cors';
+import { csrf } from 'hono/csrf';
+import { languageDetector } from 'hono/language';
+import { getOrigin } from './middleware/get-origin';
 
 const app = new Hono();
 const transactionRepo = new TransactionRepository();
+const allowedOrigins = getOrigin();
+
+/**
+ * Global Middleware
+ */
+app.use(
+  '/api/*',
+  cors({
+    origin: allowedOrigins,
+  }),
+);
+app.use(
+  csrf({
+    origin: allowedOrigins,
+  }),
+);
+app.use(
+  languageDetector({
+    supportedLanguages: ['en', 'id'],
+    fallbackLanguage: 'en',
+  }),
+);
 
 /**
  * Routes
@@ -25,7 +51,7 @@ app.get('/', (c) => {
  * Transaction routes
  */
 app.post(
-  '/drip',
+  '/api/drip',
   describeRoute({
     description: 'Do Transaction for Token Request.',
     tags: ['Transactions'], // Add one or more tags here
