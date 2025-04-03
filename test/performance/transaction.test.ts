@@ -25,7 +25,7 @@ export default function () {
     walletAddress: wallet,
   };
 
-  const res = http.post('http://localhost:1000/drip', JSON.stringify(body), {
+  const res = http.post('http://localhost:1000/api/drip', JSON.stringify(body), {
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
   });
 
