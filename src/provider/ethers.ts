@@ -4,16 +4,16 @@ import {
   ServiceUnavailableException,
 } from '../utils/error/custom';
 import { TransactionRepository } from '../database/repository/implementation';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 export class Ethers {
   private provider: ethers.providers.JsonRpcProvider;
   private signer: ethers.Wallet;
-  private repo: TransactionRepository;
 
   constructor() {
     this.provider = new ethers.providers.JsonRpcProvider(Bun.env.RPC_ADDRESS);
-    this.signer = new ethers.Wallet(Bun.env.PK_WALLET as string, this.provider);
-    this.repo = new TransactionRepository();
+    this.signer = new ethers.Wallet(String(Bun.env.PK_WALLET), this.provider);
   }
 
   private async getNonce() {
@@ -49,7 +49,7 @@ export class Ethers {
 
       const request: ethers.providers.TransactionRequest = {
         to: walletAddress,
-        value: ethers.utils.formatEther(Bun.env.TOKEN_VALUE as string),
+        value: ethers.utils.parseEther(Bun.env.TOKEN_VALUE as string),
         nonce,
         gasPrice: adjustedGasPrice,
         gasLimit: ethers.BigNumber.from(21000),
@@ -57,11 +57,11 @@ export class Ethers {
 
       const signTx = await this.signer.signTransaction(request);
       const txResponse = await this.provider.sendTransaction(signTx);
+      console.log('₿ Sending the token to target wallet address...');
       await this.provider.waitForTransaction(txResponse.hash);
-      
+
       return txResponse;
     } catch (error) {
-      await this.repo.updateFailed(walletAddress);
       throw error;
     }
   }
