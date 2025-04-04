@@ -1,14 +1,25 @@
 import { z } from 'zod';
 import 'zod-openapi/extend';
 import { regexPattern } from '../regex';
+import i18next from 'i18next';
+import {
+  INVALID_FORMAT_ADDRESS,
+  INVALID_TYPE_ADDRESS,
+} from '../../locales';
 
-export const transactionSchema = z.object({
-  walletAddress: z
-    .string()
-    .min(42)
-    .regex(regexPattern.walletRegex)
-    .openapi({ example: '0x...' }),
-});
+export const getTransactionSchema = (lng: string) => {
+  const t = i18next.getFixedT(lng);
+
+  return z.object({
+    walletAddress: z
+      .string({
+        invalid_type_error: t(INVALID_TYPE_ADDRESS),
+      })
+      .min(42, t('invalid_format_address'))
+      .regex(regexPattern.walletRegex, t(INVALID_FORMAT_ADDRESS))
+      .openapi({ example: '0x...' }),
+  });
+};
 
 /**
  * Response Schema
