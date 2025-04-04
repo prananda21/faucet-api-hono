@@ -120,11 +120,11 @@ The project is organized into the following structure:
 
 ## Test
 
-This app has several test including Performance Test using Artillery, for more information about K6 you can access [Artilery Documentation](https://www.artillery.io/docs).
+This app has several test including Performance Test using Artillery, for more information about K6 you can access [K6 Documentation](https://grafana.com/docs/k6/latest/).
 
 > **NOTES:**
 >
-> Make sure to install `Artillery` globally by using command: `yarn add -g artilery`
+> Make sure to install `K6` globally by using command: `yarn add -g k6`
 
 The command to run performance test for `transaction` API:
 
