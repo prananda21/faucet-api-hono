@@ -1,24 +1,26 @@
 import { zValidator } from '@hono/zod-validator';
-import { transactionSchema } from '../utils/validation/schema';
+import { getTransactionSchema } from '../utils/validation/schema';
 import { HttpStatusCode } from '../utils/enum';
+import i18next from 'i18next';
+import { Context, Next } from 'hono';
 
-export const transactionValidatorMiddleware = zValidator(
-  'json',
-  transactionSchema,
-  (result, c) => {
+export const transactionValidatorMiddleware = async (
+  c: Context,
+  next: Next,
+) => {
+  const lng = c.get('language') || 'en';
+  const schema = getTransactionSchema(lng);
+
+  return zValidator('json', schema, (result, ctx) => {
     if (!result.success) {
-      console.log('⛔️ Validation Error: ', result.error);
-      const message = result.error.issues.map((issue) => {
-        if (issue.message === 'Invalid') {
-          return 'Invalid format';
-        }
+      console.log('⛔️ Validation Error:', result.error);
+      const message = result.error.issues.map((issue) => issue.message);
+      const t = i18next.getFixedT(lng);
 
-        return issue.message;
-      });
-      return c.json(
-        { errors: message, message: 'Validation Error' },
+      return ctx.json(
+        { errors: message, message: t('Validation Error') },
         HttpStatusCode.BAD_REQUEST,
       );
     }
-  },
-);
+  })(c, next);
+};
