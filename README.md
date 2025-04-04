@@ -124,7 +124,7 @@ This app has several test including Performance Test using Artillery, for more i
 
 > **NOTES:**
 >
-> Make sure to install `K6` globally by using command: `yarn add -g k6`
+> Make sure to install `K6` globally by using command: `bun add -g k6`
 
 The command to run performance test for `transaction` API:
 
