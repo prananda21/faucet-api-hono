@@ -5,6 +5,7 @@ import {
 } from '../utils/error/custom';
 import { TransactionRepository } from '../database/repository/implementation';
 import * as dotenv from 'dotenv';
+import { BALANCE_TOO_LOW, GET_NONCE_ERROR } from '../locales';
 dotenv.config();
 
 export class Ethers {
@@ -20,10 +21,7 @@ export class Ethers {
     try {
       return await this.signer.getTransactionCount('latest');
     } catch (error) {
-      throw new InternalServerException(
-        'Get Nonce Error',
-        'Failed to retrieve latest nonce, check the RPC Connection.',
-      );
+      throw new InternalServerException('Get Nonce Error', GET_NONCE_ERROR);
     }
   }
 
@@ -37,7 +35,7 @@ export class Ethers {
       if (getBalance <= 5000) {
         throw new ServiceUnavailableException(
           'Balance too low',
-          'Our server quite busy now.\n\n If you need a support please contact us in General Support Channel or sending email to support@mandalachain.io',
+          BALANCE_TOO_LOW,
         );
       }
 
