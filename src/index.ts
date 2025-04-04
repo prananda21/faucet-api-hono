@@ -8,12 +8,16 @@ import { TransactionRepository } from './database/repository/implementation';
 import { formatWaitTime, isHttpError } from './utils/function';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
 import { BadRequestException } from './utils/error/custom';
-import { addJobs, queueEvent, worker } from './provider/queue';
+import { addJobs, queueEvent } from './provider/queue';
 import { IDripResponse } from './utils/interface';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { languageDetector } from 'hono/language';
 import { getOrigin } from './middleware/get-origin';
+import i18next from 'i18next';
+import Backend from 'i18next-fs-backend';
+import { LIMIT_ERROR, TRANSACTION_SUCCESS } from './locales';
+import path from 'path';
 
 const app = new Hono();
 const transactionRepo = new TransactionRepository();
@@ -37,8 +41,25 @@ app.use(
   languageDetector({
     supportedLanguages: ['en', 'id'],
     fallbackLanguage: 'en',
+    lookupFromHeaderKey: 'accept-language',
+    ignoreCase: true,
+    debug: true,
   }),
 );
+
+/**
+ * Locale Instance
+ */
+
+await (async () => {
+  await i18next.use(Backend).init({
+    fallbackLng: 'en',
+    preload: ['en', 'id'],
+    backend: {
+      loadPath: path.resolve(__dirname, './locales/{{lng}}.json'),
+    },
+  });
+})();
 
 /**
  * Routes
@@ -90,6 +111,12 @@ app.post(
     const { walletAddress } = c.req.valid('json');
 
     /**
+     * Language initiation
+     */
+    const lng = c.get('language') || 'en';
+    const t = i18next.getFixedT(lng);
+
+    /**
      * Check database first
      */
     console.log('👨‍💻 Checking on database...');
@@ -98,11 +125,14 @@ app.post(
     );
     if (alreadyTransaction.canDrip === false) {
       console.error('⛔️ Limitation Error due another transaction in one day.');
-      const waitTimeFormat = formatWaitTime(alreadyTransaction.waitTimeSeconds);
-      throw new BadRequestException(
-        'Limitation Error',
-        `Only one transaction for one wallet per day, try in ${waitTimeFormat}`,
+      const waitTimeFormat = formatWaitTime(
+        alreadyTransaction.waitTimeSeconds,
+        t,
       );
+
+      const errorMessage = t(LIMIT_ERROR, { waitTimeFormat });
+      console.log('errorMessage: ', errorMessage);
+      throw new BadRequestException('Limitation Error', errorMessage);
     }
     console.log('✅ Database checking success, continue to next flow.');
 
@@ -115,11 +145,11 @@ app.post(
     const data: IDripResponse = {
       walletAddress: result.to,
       transactionHash: result.hash,
-      tokenValue: Bun.env.TOKEN_VALUE as string,
+      tokenValue: `${Bun.env.TOKEN_VALUE as string} ${Bun.env.TOKEN_CURRENCY}`,
       onchainUrl: `${Bun.env.ONCHAIN_URL}/${result.hash}`,
     };
 
-    return c.json({ data, message: 'Transaction success.' });
+    return c.json({ data, message: t(TRANSACTION_SUCCESS) });
   },
 );
 
@@ -154,11 +184,23 @@ app.onError((err, c) => {
   console.error('Unhandled error: ', err);
   const status = isHttpError(err) ? err.status : 500;
 
+  /**
+   * Language initiation
+   */
+  const lng = c.get('language') || 'en';
+  const t = i18next.getFixedT(lng);
+
+  const localizedMessage = err.message
+    ? err.message
+    : status === 400
+    ? t('bad_request')
+    : t('internal_server_error');
+
   return c.json(
     {
       data: null,
       errors: err.name,
-      message: err.message || 'Internal Server Error',
+      message: localizedMessage || 'Internal Server Error',
     },
     status as ContentfulStatusCode,
   );
