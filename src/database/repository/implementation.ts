@@ -8,7 +8,7 @@ export class TransactionRepository implements ITransactionRepo {
   async create(wallet_address: string): Promise<TransactionValue> {
     const [newTx] = await db
       .insert(transactionTable)
-      .values({ walletAddress: wallet_address, status: 'PENDING' })
+      .values({walletAddress: wallet_address})
       .returning();
 
     return newTx;
