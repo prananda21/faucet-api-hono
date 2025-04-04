@@ -8,7 +8,6 @@
 ![Redis version](https://img.shields.io/badge/Redis-7.0%2B-DC382D?style=for-the-badge&logo=redis)
 ![Postgres version](https://img.shields.io/badge/PostgreSQL-14.13-blue?style=for-the-badge&logo=postgreSQL)
 
-
 <br/>
 
 Faucet for transfering token
@@ -98,30 +97,25 @@ The project is organized into the following structure:
 
 ```bash
 ├── node_modules               # modules of dependencies in this project
+├── drizzle                    # contain migration folder
 ├── src
-│   ├── controller             # handler for routes
-│   ├── database               # database configuration (contain repository, entities, migrations and datasource instance)
+│   ├── database               # database configuration (contain repository, schema, database instance)
 │   ├── locales                # local message instance (en & id)
-│   ├── middleware             # middleware that use in backend service (custom, env, etc.)
-│   ├── provider               # provider that used in discord bot (ethers.js, envConfig, etc)
-│   ├── routes                 # route for endpoint
-│   ├── services               # service that use in controller
-│   └── utils                  # utilities that used in discord bot (enum, etc)
+│   ├── middleware             # middleware that use in backend service (origin, validation.)
+│   ├── provider               # provider that used in app (ethers, queue, redis)
+│   └── utils                  # utilities that used in app
 ├── test
-│   ├── performance            # load testing (Artillery)
-│   └── utils                  # utilities that used in testing
+│   └── performance            # load testing (K6)
 ├── .env.example               # example of .env file
 ├── .gitignore                 # .gitignore for ignore file that doesn't want to push to github
 ├── .prettierrc                # style configuration
-├── babel.config.json          # babel configuraton for testing
+├── bun.lock                   # Bun lock file
+├── docker-compose.yml         # docker compose configuration
 ├── Dockerfile                 # Dockerfile configuration
-├── eslint.config.mjs          # linter
-├── jest.config.ts             # jest configuration for testing
-├── nodemon.json               # dev node-ts
+├── drizzle.config.ts          # Drizze configuration
 ├── package.json
 ├── README.md                  # README file contain docs
-├── tsconfig.json              # Typescript configuration
-└── yarn.lock                  # Yarn package, same as package-lock.json
+└── tsconfig.json              # Typescript configuration
 ```
 
 ## Test
@@ -132,8 +126,16 @@ This app has several test including Performance Test using Artillery, for more i
 >
 > Make sure to install `Artillery` globally by using command: `yarn add -g artilery`
 
-The command to run performance test for `faucet-drip` API:
+The command to run performance test for `transaction` API:
+
+1. Build the Test Script
 
 ```bash
-yarn test:load
+  bun test:performance:build
+```
+
+2. Run Script Test
+
+```bash
+  bun test:performance:run
 ```
