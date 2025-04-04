@@ -1,0 +1,16 @@
+{
+  "wait_seconds": "{{count}} detik.",
+  "wait_seconds_plural": "{{count}} detik.",
+  "wait_minutes": "{{count}} menit.",
+  "wait_minutes_plural": "{{count}} menit.",
+  "wait_hours": "{{count}} jam.",
+  "wait_hours_plural": "{{count}} jam.",
+  "LIMIT_ERROR": "Hanya satu transaksi untuk satu wallet dalam sehari, coba lagi dalam {{waitTimeFormat}}.",
+  "CORS_ERROR": "CORS_ORIGINS tidak terdefinisi di file .env.",
+  "INVALID_TYPE_ADDRESS": "Type dari wallet address tidak valid.",
+  "REQUIRED_ADDRESS": "Wallet address wajib terisi.",
+  "INVALID_FORMAT_ADDRESS": "Wallet address tidak sesuai dengan format EVM.",
+  "GET_NONCE_ERROR": "Gagal mendapatkan nonce terakhir, cek kembali koneksi RPC.",
+  "BALANCE_TOO_LOW": "Server kami sedang sibuk.\n\n Jika anda membutuhkan support dapat menghubungi tim kami di General Support Channel atau mengirimkan email ke support@mandalachain.io",
+  "TRANSACTION_SUCCESS": "Transaksi sukses, cek wallet anda untuk pembaruan saldo."
+}
