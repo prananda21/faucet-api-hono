@@ -12,5 +12,7 @@
   "INVALID_FORMAT_ADDRESS": "Wallet address tidak sesuai dengan format EVM.",
   "GET_NONCE_ERROR": "Gagal mendapatkan nonce terakhir, cek kembali koneksi RPC.",
   "BALANCE_TOO_LOW": "Server kami sedang sibuk.\n\n Jika anda membutuhkan support dapat menghubungi tim kami di General Support Channel atau mengirimkan email ke support@mandalachain.io",
-  "TRANSACTION_SUCCESS": "Transaksi sukses, cek wallet anda untuk pembaruan saldo."
+  "TRANSACTION_SUCCESS": "Transaksi sukses, cek wallet anda untuk pembaruan saldo.",
+  "MISSING_CAPTCHA": "Turnstile captcha token tidak ditemukan.",
+  "CAPTCHA_ERROR": "Gagal memverifikasi captcha."
 }
