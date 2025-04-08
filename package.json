@@ -2,6 +2,7 @@
   "name": "faucet-api-hono",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
+    "test:integration": "bun test --coverage ./test/integration/transaction.test.ts",
     "test:performance:build": "bun build test/performance/transaction.test.ts --outdir dist --format esm --external k6 --external k6/http --external k6/metrics",
     "test:performance:run": "k6 run dist/transaction.test.js"
   },
