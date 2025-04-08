@@ -8,7 +8,7 @@ export class TransactionRepository implements ITransactionRepo {
   async create(wallet_address: string): Promise<TransactionValue> {
     const [newTx] = await db
       .insert(transactionTable)
-      .values({walletAddress: wallet_address})
+      .values({ walletAddress: wallet_address })
       .returning();
 
     return newTx;
@@ -102,5 +102,14 @@ export class TransactionRepository implements ITransactionRepo {
       .returning();
 
     return updatedTx;
+  }
+
+  async deleteAll(): Promise<boolean> {
+    try {
+      await db.delete(transactionTable).execute();
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
