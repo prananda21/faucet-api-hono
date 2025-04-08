@@ -11,4 +11,5 @@ export interface ITransactionRepo {
   ): Promise<TransactionValue | null>;
   updateFailed(wallet_address: string): Promise<TransactionValue | null>;
   findLastTx(wallet_address: string): Promise<TransactionValue>;
+  deleteAll(): Promise<boolean>
 }
