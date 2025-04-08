@@ -18,6 +18,7 @@ import i18next from 'i18next';
 import Backend from 'i18next-fs-backend';
 import { LIMIT_ERROR, TRANSACTION_SUCCESS } from './locales';
 import path from 'path';
+import { validateTurnstile } from './middleware/turnstile';
 
 const app = new Hono();
 const transactionRepo = new TransactionRepository();
@@ -106,6 +107,7 @@ app.post(
       },
     },
   }),
+  validateTurnstile,
   transactionValidatorMiddleware,
   async (c) => {
     const { walletAddress } = c.req.valid('json');
