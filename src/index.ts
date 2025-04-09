@@ -90,8 +90,13 @@ app.post(
                 description: 'Unique Address of target wallet.',
                 example: '0x...', // Example value for amount
               },
+              captchaToken: {
+                type: 'string',
+                description: 'Captcha Token.',
+                example: '...', // Example value for amount
+              },
             },
-            required: ['walletAddress'],
+            required: ['walletAddress', 'captcha_token'],
           },
         },
       },

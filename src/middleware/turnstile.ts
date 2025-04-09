@@ -11,8 +11,8 @@ export const validateTurnstile = async (c: Context, next: Next) => {
   const t = i18next.getFixedT(lng);
 
   try {
-    const { captcha_token } = await c.req.json();
-    if (!captcha_token) {
+    const { captchaToken } = await c.req.json();
+    if (!captchaToken) {
       return c.json(
         { message: t(MISSING_CAPTCHA) },
         HttpStatusCode.BAD_REQUEST,
@@ -21,7 +21,7 @@ export const validateTurnstile = async (c: Context, next: Next) => {
 
     const params = new URLSearchParams({
       secret: TURNSTILE_SECRET,
-      response: captcha_token,
+      response: captchaToken,
     });
 
     const response = await fetch(
