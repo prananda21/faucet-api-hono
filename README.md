@@ -12,29 +12,6 @@
 
 Faucet for transfering token
 
-</div>
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li><a href="#quick-start">⚡️ Quick Start</a>
-    <li><a href="#prerequisites">Prerequisites</a></li>
-    <li><a href="#running-backend-server">Running Backend Server</a></li>
-    <li><a href="#running-indexer">Running Indexer</a></li>
-    <li><a href="#commands-options">⚙️ Commands & Options</a>
-      <ul>
-        <li><a href="#migration">Migration</a></li>
-        <li><a href="#seeder">Seeder</a></li>
-        <li><a href="#building-the-app">Building the App</a></li>
-        <li><a href="#testing">Testing</a></li>
-        <li><a href="#indexer-commands">Indexer Commands</a></li>
-      </ul>
-    </li>
-    <li><a href="#documentation">📚 Documentation</a></li>
-  </ol>
-</details>
-
 ## ⚡️ Quick Start
 
 ### Prerequisites
