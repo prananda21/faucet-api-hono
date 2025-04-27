@@ -8,7 +8,6 @@
 ![Redis version](https://img.shields.io/badge/Redis-7.0%2B-DC382D?style=for-the-badge&logo=redis)
 ![Postgres version](https://img.shields.io/badge/PostgreSQL-14.13-blue?style=for-the-badge&logo=postgreSQL)
 
-
 <br/>
 
 Faucet for transfering token
@@ -65,7 +64,7 @@ Install dependencies:
 Run Migration:
 
 ```bash
-  bun migrate
+  bun db:migrate
 ```
 
 #### Development Environment
@@ -81,13 +80,21 @@ Run Server:
 Compiling Code:
 
 ```bash
-  bun build
+  bun compile
 ```
 
 Run Server:
 
 ```bash
-  bun dev
+  bun start
+```
+
+**notes**
+
+For effieciency, you can use this command to for compiling and run the server at the same time
+
+```bash
+  bun prod
 ```
 
 $~$
@@ -126,14 +133,26 @@ The project is organized into the following structure:
 
 ## Test
 
-This app has several test including Performance Test using Artillery, for more information about K6 you can access [Artilery Documentation](https://www.artillery.io/docs).
+This app has several test including Performance Test using Artillery, for more information about K6 you can access [K6 Documentation](https://k6.io).
 
 > **NOTES:**
 >
-> Make sure to install `Artillery` globally by using command: `yarn add -g artilery`
+> Make sure to install `K6` globally by using command: `bun add k6`
 
-The command to run performance test for `faucet-drip` API:
+There's several step before running the performance test, which is:
+
+### Compile the Test Code
+
+K6 running in Javascript, that's why we need to compile it first by using command:
 
 ```bash
-yarn test:load
+  bun test:performance:build
+```
+
+### Running the Performance Test
+
+After compiling the test code, then use this command for running the performance test
+
+```bash
+  bun test:performance:run
 ```
