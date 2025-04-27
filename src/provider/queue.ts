@@ -46,6 +46,7 @@ export const worker = new Worker(
       console.log('✅ Sending token success.');
       return tx;
     } catch (error) {
+      console.error('🚨 Error due running the worker, error: ', error)
       await transactionRepo.updateFailed(walletAddress);
       throw error;
     }
