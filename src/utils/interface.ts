@@ -37,3 +37,13 @@ export interface IDripResponse {
 export interface JobDataType {
   walletAddress: DEFAULT_EVM_ADDRESS;
 }
+
+export interface ApiResponse<T> {
+  status: boolean;
+  message: string;
+  data: T | null;
+}
+
+export interface ErrorResponse<T, E> extends ApiResponse<T> {
+  errors: E;
+}

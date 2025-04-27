@@ -84,7 +84,7 @@ export class TransactionRepository implements ITransactionRepo {
 
     const [updatedTx] = await db
       .update(transactionTable)
-      .set({ transactionHash: tx_hash, status: 'SUCCESS' })
+      .set({ transactionHash: tx_hash, status: 'SUCCESS' } as any)
       .where(eq(transactionTable.id, existingTx.id))
       .returning();
 
@@ -97,7 +97,7 @@ export class TransactionRepository implements ITransactionRepo {
 
     const [updatedTx] = await db
       .update(transactionTable)
-      .set({ transactionHash: null, status: 'FAILED' })
+      .set({ transactionHash: null, status: 'FAILED' } as any)
       .where(eq(transactionTable.id, existingTx.id))
       .returning();
 

@@ -1,8 +1,13 @@
 import { Context, Next } from 'hono';
-import { HttpStatusCode } from '../utils/enum';
-import { getTransactionSchema } from '../utils/validation/schema';
 import i18next from 'i18next';
 import { CAPTCHA_ERROR, MISSING_CAPTCHA } from '../locales';
+import { HttpStatusCode } from 'axios';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  InternalServerException,
+} from '@/utils/error/custom';
 
 const TURNSTILE_SECRET = Bun.env.TURNSTILE_SECRET || '';
 
@@ -13,10 +18,7 @@ export const validateTurnstile = async (c: Context, next: Next) => {
   try {
     const { captchaToken } = await c.req.json();
     if (!captchaToken) {
-      return c.json(
-        { message: t(MISSING_CAPTCHA) },
-        HttpStatusCode.BAD_REQUEST,
-      );
+      throw new BadRequestException(t(MISSING_CAPTCHA));
     }
 
     const params = new URLSearchParams({
@@ -35,17 +37,18 @@ export const validateTurnstile = async (c: Context, next: Next) => {
 
     const result = await response.json();
     if (!result.success) {
-      return c.json({ message: t(CAPTCHA_ERROR) }, HttpStatusCode.FORBIDDEN);
+      throw new ForbiddenException(t(CAPTCHA_ERROR));
     }
 
     await next();
   } catch (error) {
     console.error('Turnstile verification error: ', error);
-    return c.json(
-      {
-        message: error.message || 'Internal Server Error',
-      },
-      HttpStatusCode.INTERNAL_SERVER,
+    if (error instanceof HttpException) {
+      throw error;
+    }
+
+    throw new InternalServerException(
+      'An unexpected error occurred. please try again later.',
     );
   }
 };

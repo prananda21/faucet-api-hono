@@ -1,3 +1,5 @@
+# This docker compose file for development only
+
 version: '3.8'
 
 services:

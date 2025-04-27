@@ -4,6 +4,7 @@ import { regexPattern } from '../regex';
 import i18next from 'i18next';
 import {
   INVALID_FORMAT_ADDRESS,
+  INVALID_MIN_ADDRESS,
   INVALID_TYPE_ADDRESS,
 } from '../../locales';
 
@@ -15,11 +16,21 @@ export const getTransactionSchema = (lng: string) => {
       .string({
         invalid_type_error: t(INVALID_TYPE_ADDRESS),
       })
-      .min(42, t('invalid_format_address'))
+      .min(42, t(INVALID_MIN_ADDRESS))
       .regex(regexPattern.walletRegex, t(INVALID_FORMAT_ADDRESS))
       .openapi({ example: '0x...' }),
   });
 };
+
+export const transactionSchema = z.object({
+  walletAddress: z
+    .string({
+      invalid_type_error: INVALID_TYPE_ADDRESS,
+    })
+    .min(42, INVALID_MIN_ADDRESS)
+    .regex(regexPattern.walletRegex, INVALID_FORMAT_ADDRESS)
+    .openapi({ example: '0x...' }),
+});
 
 /**
  * Response Schema
