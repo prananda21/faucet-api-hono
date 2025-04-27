@@ -14,5 +14,6 @@
   "BALANCE_TOO_LOW": "Our server quite busy now.\n\n If you need a support please contact us in General Support Channel or sending email to support@mandalachain.io",
   "TRANSACTION_SUCCESS": "Transaction success, check you wallet for updated balance.",
   "MISSING_CAPTCHA": "Turnstile captcha token is missing.",
-  "CAPTCHA_ERROR": "Captcha verification failed."
+  "CAPTCHA_ERROR": "Captcha verification failed.",
+  "INVALID_MIN_ADDRESS": "Minimum character of wallet address not fulfilled"
 }

@@ -14,5 +14,6 @@
   "BALANCE_TOO_LOW": "Server kami sedang sibuk.\n\n Jika anda membutuhkan support dapat menghubungi tim kami di General Support Channel atau mengirimkan email ke support@mandalachain.io",
   "TRANSACTION_SUCCESS": "Transaksi sukses, cek wallet anda untuk pembaruan saldo.",
   "MISSING_CAPTCHA": "Turnstile captcha token tidak ditemukan.",
-  "CAPTCHA_ERROR": "Gagal memverifikasi captcha."
+  "CAPTCHA_ERROR": "Gagal memverifikasi captcha.",
+  "INVALID_MIN_ADDRESS": "Minimum karakter pada wallet address tidak terpenuhi"
 }
