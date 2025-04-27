@@ -23,7 +23,7 @@ Faucet for transfering token
 
 The project utilizes the following tools:
 
-- **Bun `1.2.5`** : Bun is an all-in-one toolkit for JavaScript and TypeScript apps. It ships as a single executable called bun.
+- **Bun `1.2.10`** : Bun is an all-in-one toolkit for JavaScript and TypeScript apps. It ships as a single executable called bun.
 - **TypeScript `5.8.2`** : A superset of JavaScript that allows specifying the types of data being passed around within the code, and has the ability to report errors when the types don't match.
 - **PostgreSQL `14`** : An open-source, object-relational database management system (ORDBMS) that supports both relational (SQL) and non-relational (JSON) data types.
 - **Redis `7`** : An open-source data structure server belonging to the class of NoSQL databases known as key/value stores.
