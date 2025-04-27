@@ -2,9 +2,12 @@
 
 # Faucet API
 
-![TypeScript version](https://img.shields.io/badge/TypeScript-5.6.3%2B-007ACC?style=for-the-badge&logo=typescript)
-![Ethers version](https://img.shields.io/badge/Ethers/api-15.1.1-white?style=for-the-badge&logo=ethers)
-![BullMQ version](https://img.shields.io/badge/BullMQ-15.1.1-red?style=for-the-badge&logo=bullmq)
+![Bun version](https://img.shields.io/badge/Bun-1.2.10-white?style=for-the-badge&logo=bun)
+![TypeScript version](https://img.shields.io/badge/TypeScript-5.8.2%2B-007ACC?style=for-the-badge&logo=typescript)
+![Hono version](https://img.shields.io/badge/Hono-4.7.7-orange?style=for-the-badge&logo=Hono)
+![Drizzle ORM version](https://img.shields.io/badge/Drizzle-^0.41.0-green?style=for-the-badge&logo=Drizzle)
+![Ethers version](https://img.shields.io/badge/Ethers-5.7.2-white?style=for-the-badge&logo=ethers)
+![BullMQ version](https://img.shields.io/badge/BullMQ-5.51.1-red?style=for-the-badge&logo=bullmq)
 ![Redis version](https://img.shields.io/badge/Redis-7.0%2B-DC382D?style=for-the-badge&logo=redis)
 ![Postgres version](https://img.shields.io/badge/PostgreSQL-14.13-blue?style=for-the-badge&logo=postgreSQL)
 
@@ -28,9 +31,9 @@ The project utilizes the following tools:
 The project also uses some packages like:
 
 - **Drizzle ORM `^0.41.0`** : Drizzle ORM is a headless TypeScript ORM with a head.
-- **Hono `^4.7.5`** : Fast, lightweight, built on Web Standards. Support for any JavaScript runtime.
-- **Ethers `5.7`** : Library aims to be a complete and compact library for interacting with the Ethereum Blockchain and its ecosystem
-- **BullMQ `^5.46.1`** : An Node.js library that implements a fast and robust queue system built on top of Redis that helps in resolving many modern age micro-services architectures.
+- **Hono `^4.7.7`** : Fast, lightweight, built on Web Standards. Support for any JavaScript runtime.
+- **Ethers `5.7.2`** : Library aims to be a complete and compact library for interacting with the Ethereum Blockchain and its ecosystem
+- **BullMQ `^5.51.1`** : An Node.js library that implements a fast and robust queue system built on top of Redis that helps in resolving many modern age micro-services architectures.
 
 ### Running Backend Server
 
