@@ -10,6 +10,8 @@
 
 <br/>
 
+</div>
+
 Faucet for transfering token
 
 ## ⚡️ Quick Start
