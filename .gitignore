@@ -44,3 +44,4 @@ package-lock.json
 
 # Custom
 dist
+dist-test
