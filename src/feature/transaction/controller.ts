@@ -7,14 +7,14 @@ import { TransactionService } from './service';
 import { ValidationException } from '@/utils/error/custom';
 
 const factory = createFactory();
-const transactionService = new TransactionService()
+const transactionService = new TransactionService();
 
 export const transactionDrip = factory.createHandlers(
-  // validateTurnstile,
+  validateTurnstile,
   zValidator('json', transactionSchema, (result, c) => {
     if (result.success == false) {
       const errors = result.error.issues.map((issue) => issue.message);
-  
+
       throw new ValidationException('Validation Error', errors);
     }
   }),
@@ -27,8 +27,8 @@ export const transactionDrip = factory.createHandlers(
     const lng = c.get('language') || 'en';
     const t = i18next.getFixedT(lng);
 
-    const response = await transactionService.drip(walletAddress, lng)
+    const response = await transactionService.drip(walletAddress, lng);
 
-    return c.json(response)
+    return c.json(response);
   },
 );
