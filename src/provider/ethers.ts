@@ -1,11 +1,10 @@
 import { ethers } from 'ethers';
+import * as dotenv from 'dotenv';
+import { BALANCE_TOO_LOW, GET_NONCE_ERROR } from '@/locales';
 import {
   InternalServerException,
   ServiceUnavailableException,
-} from '../utils/error/custom';
-import { TransactionRepository } from '../database/repository/implementation';
-import * as dotenv from 'dotenv';
-import { BALANCE_TOO_LOW, GET_NONCE_ERROR } from '../locales';
+} from '@/utils/error/custom';
 dotenv.config();
 
 export class Ethers {
@@ -21,7 +20,7 @@ export class Ethers {
     try {
       return await this.signer.getTransactionCount('latest');
     } catch (error) {
-      throw new InternalServerException('Get Nonce Error', GET_NONCE_ERROR);
+      throw new InternalServerException(GET_NONCE_ERROR);
     }
   }
 
@@ -33,10 +32,7 @@ export class Ethers {
         ),
       );
       if (getBalance <= 5000) {
-        throw new ServiceUnavailableException(
-          'Balance too low',
-          BALANCE_TOO_LOW,
-        );
+        throw new ServiceUnavailableException(BALANCE_TOO_LOW);
       }
 
       const nonce = await this.getNonce();
@@ -61,6 +57,19 @@ export class Ethers {
       return txResponse;
     } catch (error) {
       throw error;
+    }
+  }
+
+  // for log if the blockchain connection success
+  public async ensureChainConnected(): Promise<void> {
+    try {
+      const network = await this.provider.getNetwork();
+      console.log(
+        `✅ Blockchain RPC healthy: ${network.name} (chainId ${network.chainId})`,
+      );
+    } catch (error) {
+      console.error('❌ Blockchain RPC connection failed:', error);
+      process.exit(1);
     }
   }
 }

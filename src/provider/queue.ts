@@ -1,9 +1,9 @@
 import { Job, Queue, QueueEvents, Worker } from 'bullmq';
-import { JobDataType } from '../utils/interface';
 import { Ethers } from './ethers';
 import { ethers } from 'ethers';
+import { JobDataType } from '@/utils/interface';
+import { TransactionRepository } from '@/database/repository/implementation';
 import { connection } from './redis';
-import { TransactionRepository } from '../database/repository/implementation';
 
 /**
  * Initiate the Ethers & Transaction Repo Class

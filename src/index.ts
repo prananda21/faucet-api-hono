@@ -1,28 +1,26 @@
 import { Hono } from 'hono';
-import { transactionValidatorMiddleware } from './middleware/validation';
-import { describeRoute, openAPISpecs } from 'hono-openapi';
-import { resolver } from 'hono-openapi/zod';
-import { transactionResponseSchema } from './utils/validation/schema';
+import { openAPISpecs } from 'hono-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
-import { TransactionRepository } from './database/repository/implementation';
-import { formatWaitTime, isHttpError } from './utils/function';
+import { isHttpError } from './utils/function';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
-import { BadRequestException } from './utils/error/custom';
-import { addJobs, queueEvent } from './provider/queue';
-import { IDripResponse } from './utils/interface';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { languageDetector } from 'hono/language';
-import { getOrigin } from './middleware/get-origin';
 import i18next from 'i18next';
 import Backend from 'i18next-fs-backend';
-import { LIMIT_ERROR, TRANSACTION_SUCCESS } from './locales';
 import path from 'path';
-import { validateTurnstile } from './middleware/turnstile';
+import transactionRoute from '@/feature/transaction/routes';
+import { getOrigin } from './middleware/get-origin';
+import { HttpException, ValidationException } from './utils/error/custom';
+import { ApiResponse, ErrorResponse } from './utils/interface';
+import { serve } from 'bun';
+import { isDatabaseInitialized } from './database';
+import RedisInstance, { connection, isRedisInitialize } from './provider/redis';
+import { Ethers } from './provider/ethers';
 
 const app = new Hono();
-const transactionRepo = new TransactionRepository();
 const allowedOrigins = getOrigin();
+const ethersService = new Ethers();
 
 /**
  * Global Middleware
@@ -69,96 +67,8 @@ app.get('/', (c) => {
   return c.json({ message: `Welcome to Faucet API!` });
 });
 
-/**
- * Transaction routes
- */
-app.post(
-  '/api/drip',
-  describeRoute({
-    description: 'Do Transaction for Token Request.',
-    tags: ['Transactions'], // Add one or more tags here
-    requestBody: {
-      description: 'Payload for token request',
-      required: true,
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              walletAddress: {
-                type: 'string',
-                description: 'Unique Address of target wallet.',
-                example: '0x...', // Example value for amount
-              },
-              captchaToken: {
-                type: 'string',
-                description: 'Captcha Token.',
-                example: '...', // Example value for amount
-              },
-            },
-            required: ['walletAddress', 'captcha_token'],
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: 'Successful sending token.',
-        content: {
-          'application/json': {
-            schema: resolver(transactionResponseSchema),
-          },
-        },
-      },
-    },
-  }),
-  validateTurnstile,
-  transactionValidatorMiddleware,
-  async (c) => {
-    const { walletAddress } = c.req.valid('json');
-
-    /**
-     * Language initiation
-     */
-    const lng = c.get('language') || 'en';
-    const t = i18next.getFixedT(lng);
-
-    /**
-     * Check database first
-     */
-    console.log('👨‍💻 Checking on database...');
-    const alreadyTransaction = await transactionRepo.hasWalletDripToday(
-      walletAddress,
-    );
-    if (alreadyTransaction.canDrip === false) {
-      console.error('⛔️ Limitation Error due another transaction in one day.');
-      const waitTimeFormat = formatWaitTime(
-        alreadyTransaction.waitTimeSeconds,
-        t,
-      );
-
-      const errorMessage = t(LIMIT_ERROR, { waitTimeFormat });
-      console.log('errorMessage: ', errorMessage);
-      throw new BadRequestException('Limitation Error', errorMessage);
-    }
-    console.log('✅ Database checking success, continue to next flow.');
-
-    /**
-     * Add Queue
-     */
-    console.log('🚶 Entering queue...');
-    const job = await addJobs(walletAddress, { walletAddress });
-    const result = await job.waitUntilFinished(queueEvent);
-    const data: IDripResponse = {
-      walletAddress: result.to,
-      transactionHash: result.hash,
-      tokenValue: `${Bun.env.TOKEN_VALUE as string} ${Bun.env.TOKEN_CURRENCY}`,
-      onchainUrl: `${Bun.env.ONCHAIN_URL}/${result.hash}`,
-    };
-
-    return c.json({ data, message: t(TRANSACTION_SUCCESS) });
-  },
-);
+const api = app.basePath('/api');
+api.route('/transaction', transactionRoute);
 
 /**
  * Documentation routes
@@ -203,17 +113,105 @@ app.onError((err, c) => {
     ? t('bad_request')
     : t('internal_server_error');
 
+  if (err instanceof ValidationException) {
+    const status = err.status;
+    const resp = err.errors;
+    const message = resp.error || err.message;
+    console.log(message);
+    const errors = Array.isArray(resp) ? resp : [resp];
+
+    const localizedErrors = errors.map((value) => {
+      return t(value);
+    });
+
+    return c.json<ErrorResponse<null, string[]>>(
+      {
+        status: false,
+        message: t(message),
+        errors: localizedErrors,
+        data: null,
+      },
+      status as ContentfulStatusCode,
+    );
+  }
+
+  if (err instanceof HttpException) {
+    return c.json<ApiResponse<null>>(
+      {
+        status: false,
+        message: err.message,
+        data: null,
+      },
+      err.status as ContentfulStatusCode,
+    );
+  }
+  console.log('error diluar if statement');
+
   return c.json(
     {
-      data: null,
+      status: false,
       errors: err.name,
-      message: localizedMessage || 'Internal Server Error',
+      message: err.message || 'Internal Server Error',
     },
-    status as ContentfulStatusCode,
+    500,
   );
 });
 
-export default {
-  port: 1000,
-  fetch: app.fetch,
-};
+async function bootstrap() {
+  try {
+    console.log('📊 connecting into database...');
+    if (!(await isDatabaseInitialized())) {
+      console.error('🚨 Database not initialized! Run migrations first.');
+      process.exit(1);
+    }
+    console.log('✅ Database connected successfully.');
+
+    await RedisInstance.loadRedis();
+
+    console.log('⛓️ connecting into chain network...');
+    await ethersService.ensureChainConnected();
+
+    const server = serve({
+      port: 1000,
+      fetch: app.fetch,
+    });
+
+    console.log(`server is running on http://localhost:${server.port}`);
+    console.log(`environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(
+      `server documentation is running on http://localhost:${server.port}/docs`,
+    );
+
+    console.log(`
+███████╗██╗   ██╗ ██████╗ ██████╗███████╗███████╗███████╗                
+██╔════╝██║   ██║██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝                
+███████╗██║   ██║██║     ██║     █████╗  ███████╗███████╗                
+╚════██║██║   ██║██║     ██║     ██╔══╝  ╚════██║╚════██║                
+███████║╚██████╔╝╚██████╗╚██████╗███████╗███████║███████║                
+╚══════╝ ╚═════╝  ╚═════╝ ╚═════╝╚══════╝╚══════╝╚══════╝                
+                                                                         
+███████╗ █████╗ ██╗   ██╗ ██████╗███████╗████████╗     █████╗ ██████╗ ██╗
+██╔════╝██╔══██╗██║   ██║██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗██╔══██╗██║
+█████╗  ███████║██║   ██║██║     █████╗     ██║       ███████║██████╔╝██║
+██╔══╝  ██╔══██║██║   ██║██║     ██╔══╝     ██║       ██╔══██║██╔═══╝ ██║
+██║     ██║  ██║╚██████╔╝╚██████╗███████╗   ██║       ██║  ██║██║     ██║
+╚═╝     ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝   ╚═╝       ╚═╝  ╚═╝╚═╝     ╚═╝
+                                                                         
+██████╗  █████╗  ██████╗██╗  ██╗███████╗███╗   ██╗██████╗                
+██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██╔════╝████╗  ██║██╔══██╗               
+██████╔╝███████║██║     █████╔╝ █████╗  ██╔██╗ ██║██║  ██║               
+██╔══██╗██╔══██║██║     ██╔═██╗ ██╔══╝  ██║╚██╗██║██║  ██║               
+██████╔╝██║  ██║╚██████╗██║  ██╗███████╗██║ ╚████║██████╔╝               
+╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝           
+                                                                          
+      `);
+    console.log('----------------Logs Below---------------');
+
+    // Note: Bun.serve returns immediately—no need to await it.
+  } catch (error) {
+    console.error('failed to initialize services:', error);
+    process.exit(1);
+  }
+}
+
+bootstrap();

@@ -1,8 +1,7 @@
 import { Context, Next } from 'hono';
-import { HttpStatusCode } from '../utils/enum';
-import { getTransactionSchema } from '../utils/validation/schema';
 import i18next from 'i18next';
 import { CAPTCHA_ERROR, MISSING_CAPTCHA } from '../locales';
+import { HttpStatusCode } from 'axios';
 
 const TURNSTILE_SECRET = Bun.env.TURNSTILE_SECRET || '';
 
@@ -13,10 +12,7 @@ export const validateTurnstile = async (c: Context, next: Next) => {
   try {
     const { captchaToken } = await c.req.json();
     if (!captchaToken) {
-      return c.json(
-        { message: t(MISSING_CAPTCHA) },
-        HttpStatusCode.BAD_REQUEST,
-      );
+      return c.json({ message: t(MISSING_CAPTCHA) }, HttpStatusCode.BadRequest);
     }
 
     const params = new URLSearchParams({
@@ -35,7 +31,7 @@ export const validateTurnstile = async (c: Context, next: Next) => {
 
     const result = await response.json();
     if (!result.success) {
-      return c.json({ message: t(CAPTCHA_ERROR) }, HttpStatusCode.FORBIDDEN);
+      return c.json({ message: t(CAPTCHA_ERROR) }, HttpStatusCode.Forbidden);
     }
 
     await next();
@@ -45,7 +41,7 @@ export const validateTurnstile = async (c: Context, next: Next) => {
       {
         message: error.message || 'Internal Server Error',
       },
-      HttpStatusCode.INTERNAL_SERVER,
+      HttpStatusCode.InternalServerError,
     );
   }
 };
