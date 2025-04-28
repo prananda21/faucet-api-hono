@@ -11,12 +11,18 @@ import Backend from 'i18next-fs-backend';
 import path from 'path';
 import transactionRoute from '@/feature/transaction/routes';
 import { getOrigin } from './middleware/get-origin';
-import { HttpException, ValidationException } from './utils/error/custom';
+import {
+  HttpException,
+  InternalServerException,
+  ValidationException,
+} from './utils/error/custom';
 import { ApiResponse, ErrorResponse } from './utils/interface';
 import { serve } from 'bun';
 import { isDatabaseInitialized } from './database';
 import RedisInstance, { connection, isRedisInitialize } from './provider/redis';
 import { Ethers } from './provider/ethers';
+import { sentry } from '@hono/sentry';
+import { dedupeIntegration } from 'toucan-js';
 
 const app = new Hono();
 const allowedOrigins = getOrigin();
@@ -43,6 +49,29 @@ app.use(
     lookupFromHeaderKey: 'accept-language',
     ignoreCase: true,
     debug: true,
+  }),
+);
+
+// Monitoring (Sentry)
+app.use(
+  '*',
+  sentry({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    sampleRate: parseFloat(process.env.SENTRY_SAMPLE_RATE ?? '1.0'), // % of errors sent
+    tracesSampleRate: parseFloat(
+      process.env.SENTRY_TRACES_SAMPLE_RATE ?? '0.0',
+    ),
+    debug: process.env.SENTRY_DEBUG === 'true', // prints internal logs,
+    integrations: [dedupeIntegration()],
+
+    // **Drop noisy events**: health checks, pings, etc.
+    beforeSend(event) {
+      if (event.transaction === '/health') {
+        return null;
+      }
+      return event;
+    },
   }),
 );
 
@@ -100,6 +129,7 @@ app.get('/docs', swaggerUI({ url: 'openapi' }));
 app.onError((err, c) => {
   console.error('Unhandled error: ', err);
   const status = isHttpError(err) ? err.status : 500;
+  const client = c.get('sentry');
 
   /**
    * Language initiation
@@ -135,6 +165,20 @@ app.onError((err, c) => {
     );
   }
 
+  if (err instanceof InternalServerException) {
+    // this monitoring only capture error
+    client.captureException(err);
+
+    return c.json<ApiResponse<null>>(
+      {
+        status: false,
+        message: err.message,
+        data: null,
+      },
+      err.status as ContentfulStatusCode,
+    );
+  }
+
   if (err instanceof HttpException) {
     return c.json<ApiResponse<null>>(
       {
@@ -145,7 +189,6 @@ app.onError((err, c) => {
       err.status as ContentfulStatusCode,
     );
   }
-  console.log('error diluar if statement');
 
   return c.json(
     {
