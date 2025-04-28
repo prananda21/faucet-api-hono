@@ -10,10 +10,14 @@
     "paths": {
       "@/*": ["src/*"]
     },
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "types": [
       // Remove or fix these entries if they are not correct or necessary.
       "json-schema",
       "k6"
     ]
-  }
+  },
+  "exclude": ["node_modules", "dist", "dist-test"],
+  "include": ["src/**/*", "test/**/*"]
 }
